@@ -1,3 +1,5 @@
+"use client"
+
 import { useState, useEffect } from "react"
 import {
   Box,
@@ -119,7 +121,7 @@ export default function Cart() {
 
   // Add theme and isMobile detection
   const theme = useTheme()
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"))
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"))
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "lg"))
 
   // Function to get the price tier based on quantity
@@ -227,7 +229,7 @@ export default function Cart() {
 
       <Grid container spacing={3}>
         {/* Cart Items */}
-        <Grid item xs={12} sm={isMobile ? 12 : 8}>
+        <Grid item xs={12} md={8}>
           <Paper variant="outlined" sx={{ mb: 3 }}>
             {cartItems.length === 0 ? (
               <Box sx={{ p: 4, textAlign: "center" }}>
@@ -249,7 +251,7 @@ export default function Cart() {
                   Continue Shopping
                 </Button>
               </Box>
-            ) : isMobile ? (
+            ) : isMobile || isTablet ? (
               // Mobile view - Card layout
               <Box>
                 {cartItems.map((item) => {
@@ -563,7 +565,7 @@ export default function Cart() {
         </Grid>
 
         {/* Order Summary */}
-        <Grid item xs={12} sm={isMobile ? 12 : 4}>
+        <Grid item xs={12} md={4}>
           {/* Cashback Summary Box */}
           <Paper
             variant="outlined"

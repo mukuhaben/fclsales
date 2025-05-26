@@ -53,7 +53,6 @@ import {
   ExitToApp,
   Menu as MenuIcon,
   AttachMoney,
-  Assignment,
 } from "@mui/icons-material"
 import { useNavigate } from "react-router-dom"
 
@@ -116,59 +115,151 @@ const mockCustomers = [
   },
 ]
 
-// Mock data for commission tracking
+// Mock data for commission tracking with order sequence
 const mockCommissions = [
   {
     id: 1,
     orderNumber: "ORD-2023-001",
+    customerId: 1,
     customerName: "John Doe",
     orderDate: "2023-06-15",
     orderAmount: 85000,
-    commissionRate: 5,
-    commissionAmount: 4250,
+    orderSequence: 1, // First order
+    commissionRate: 6,
+    commissionAmount: 5100,
     status: "paid",
   },
   {
     id: 2,
     orderNumber: "ORD-2023-002",
+    customerId: 2,
     customerName: "Jane Smith",
     orderDate: "2023-06-16",
     orderAmount: 120000,
-    commissionRate: 5,
-    commissionAmount: 6000,
+    orderSequence: 1, // First order
+    commissionRate: 6,
+    commissionAmount: 7200,
     status: "pending",
   },
   {
     id: 3,
     orderNumber: "ORD-2023-003",
-    customerName: "Mike Johnson",
+    customerId: 1,
+    customerName: "John Doe",
     orderDate: "2023-06-17",
     orderAmount: 95000,
-    commissionRate: 5,
-    commissionAmount: 4750,
+    orderSequence: 2, // Second order
+    commissionRate: 4,
+    commissionAmount: 3800,
     status: "paid",
   },
   {
     id: 4,
     orderNumber: "ORD-2023-004",
-    customerName: "Sarah Wilson",
+    customerId: 3,
+    customerName: "Mike Johnson",
     orderDate: "2023-06-18",
     orderAmount: 75000,
-    commissionRate: 5,
-    commissionAmount: 3750,
+    orderSequence: 1, // First order
+    commissionRate: 6,
+    commissionAmount: 4500,
     status: "pending",
   },
   {
     id: 5,
     orderNumber: "ORD-2023-005",
-    customerName: "David Brown",
+    customerId: 2,
+    customerName: "Jane Smith",
     orderDate: "2023-06-19",
     orderAmount: 110000,
-    commissionRate: 5,
-    commissionAmount: 5500,
+    orderSequence: 2, // Second order
+    commissionRate: 4,
+    commissionAmount: 4400,
     status: "paid",
   },
+  {
+    id: 6,
+    orderNumber: "ORD-2023-006",
+    customerId: 1,
+    customerName: "John Doe",
+    orderDate: "2023-06-20",
+    orderAmount: 65000,
+    orderSequence: 3, // Third order
+    commissionRate: 3,
+    commissionAmount: 1950,
+    status: "paid",
+  },
+  {
+    id: 7,
+    orderNumber: "ORD-2023-007",
+    customerId: 4,
+    customerName: "Sarah Wilson",
+    orderDate: "2023-06-21",
+    orderAmount: 88000,
+    orderSequence: 1, // First order
+    commissionRate: 6,
+    commissionAmount: 5280,
+    status: "pending",
+  },
+  {
+    id: 8,
+    orderNumber: "ORD-2023-008",
+    customerId: 1,
+    customerName: "John Doe",
+    orderDate: "2023-06-22",
+    orderAmount: 92000,
+    orderSequence: 4, // Fourth order
+    commissionRate: 2,
+    commissionAmount: 1840,
+    status: "paid",
+  },
+  {
+    id: 9,
+    orderNumber: "ORD-2023-009",
+    customerId: 5,
+    customerName: "David Brown",
+    orderDate: "2023-06-23",
+    orderAmount: 105000,
+    orderSequence: 1, // First order
+    commissionRate: 6,
+    commissionAmount: 6300,
+    status: "paid",
+  },
+  {
+    id: 10,
+    orderNumber: "ORD-2023-010",
+    customerId: 1,
+    customerName: "John Doe",
+    orderDate: "2023-06-24",
+    orderAmount: 78000,
+    orderSequence: 5, // Fifth order - no commission
+    commissionRate: 0,
+    commissionAmount: 0,
+    status: "no_commission",
+  },
 ]
+
+// Commission calculation function
+const calculateCommissionRate = (orderSequence) => {
+  switch (orderSequence) {
+    case 1:
+      return 6 // 6% for first order
+    case 2:
+      return 4 // 4% for second order
+    case 3:
+      return 3 // 3% for third order
+    case 4:
+      return 2 // 2% for fourth order
+    default:
+      return 0 // 0% for fifth order and beyond
+  }
+}
+
+// Function to calculate commission amount
+const calculateCommissionAmount = (orderAmount, orderSequence) => {
+  const rate = calculateCommissionRate(orderSequence)
+  return (orderAmount * rate) / 100
+}
 
 const DRAWER_WIDTH = 240
 
@@ -270,16 +361,15 @@ const SalesAgentPage = () => {
   // Sidebar content
   const sidebarItems = [
     { id: "dashboard", label: "Dashboard", icon: <Dashboard /> },
-    { id: "customers", label: "My Customers", icon: <People /> },
+    { id: "customers", label: "Customers", icon: <People /> },
     { id: "commissions", label: "Commission Tracking", icon: <AttachMoney /> },
-    { id: "reports", label: "Reports", icon: <Assignment /> },
   ]
 
   const drawer = (
     <Box sx={{ height: "100%", bgcolor: "#f8f9fa" }}>
       <Box sx={{ p: 3, borderBottom: "1px solid #e9ecef" }}>
         <Typography variant="h6" sx={{ fontWeight: "bold", color: "#1976d2", fontSize: "1.1rem" }}>
-          Sales Portal
+          Sales Agent Portal
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ fontSize: "0.875rem", mt: 0.5 }}>
           {currentUser?.username || "Sales Agent"}
@@ -410,9 +500,8 @@ const SalesAgentPage = () => {
               </IconButton>
               <Typography variant="h5" sx={{ fontWeight: 600, color: "#333" }}>
                 {activeView === "dashboard" && "Dashboard"}
-                {activeView === "customers" && "My Onboarded Customers"}
+                {activeView === "customers" && "Onboarded Customers"}
                 {activeView === "commissions" && "Commission Tracking"}
-                {activeView === "reports" && "Reports"}
               </Typography>
             </Box>
 
@@ -621,10 +710,6 @@ const SalesAgentPage = () => {
                           <TableCell sx={{ fontWeight: 600, color: "#333", fontSize: "0.875rem" }}>
                             Total Orders
                           </TableCell>
-                          <TableCell sx={{ fontWeight: 600, color: "#333", fontSize: "0.875rem" }}>
-                            Total Spent
-                          </TableCell>
-                          <TableCell sx={{ fontWeight: 600, color: "#333", fontSize: "0.875rem" }}>Status</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -681,24 +766,6 @@ const SalesAgentPage = () => {
                                 {customer.totalOrders}
                               </Typography>
                             </TableCell>
-                            <TableCell>
-                              <Typography variant="body2" color="text.secondary">
-                                KSH {(customer.totalSpent / 1000).toFixed(0)}K
-                              </Typography>
-                            </TableCell>
-                            <TableCell>
-                              <Chip
-                                label={customer.status}
-                                size="small"
-                                sx={{
-                                  bgcolor: "#e8f5e9",
-                                  color: "#2e7d32",
-                                  fontWeight: 500,
-                                  fontSize: "0.75rem",
-                                  height: 24,
-                                }}
-                              />
-                            </TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -743,7 +810,7 @@ const SalesAgentPage = () => {
                           Commission Rate
                         </Typography>
                         <Typography variant="h4" sx={{ color: "#1976d2", fontWeight: 600 }}>
-                          5%
+                          Variable
                         </Typography>
                       </CardContent>
                     </Card>
@@ -760,6 +827,9 @@ const SalesAgentPage = () => {
                           </TableCell>
                           <TableCell sx={{ fontWeight: 600, color: "#333", fontSize: "0.875rem" }}>
                             Customer Name
+                          </TableCell>
+                          <TableCell sx={{ fontWeight: 600, color: "#333", fontSize: "0.875rem" }}>
+                            Order Sequence
                           </TableCell>
                           <TableCell sx={{ fontWeight: 600, color: "#333", fontSize: "0.875rem" }}>
                             Order Date
@@ -798,6 +868,18 @@ const SalesAgentPage = () => {
                                 {commission.customerName}
                               </Typography>
                             </TableCell>
+                            <TableCell align="center">
+                              <Chip
+                                label={`${commission.orderSequence}${commission.orderSequence === 1 ? "st" : commission.orderSequence === 2 ? "nd" : commission.orderSequence === 3 ? "rd" : "th"} Order`}
+                                size="small"
+                                sx={{
+                                  bgcolor: commission.orderSequence <= 4 ? "#e8f5e9" : "#ffebee",
+                                  color: commission.orderSequence <= 4 ? "#2e7d32" : "#c62828",
+                                  fontWeight: 500,
+                                  fontSize: "0.75rem",
+                                }}
+                              />
+                            </TableCell>
                             <TableCell>
                               <Typography variant="body2" color="text.secondary">
                                 {commission.orderDate}
@@ -827,11 +909,21 @@ const SalesAgentPage = () => {
                             </TableCell>
                             <TableCell align="center">
                               <Chip
-                                label={commission.status}
+                                label={commission.status === "no_commission" ? "No Commission" : commission.status}
                                 size="small"
                                 sx={{
-                                  bgcolor: commission.status === "paid" ? "#e8f5e9" : "#fff3e0",
-                                  color: commission.status === "paid" ? "#2e7d32" : "#f57c00",
+                                  bgcolor:
+                                    commission.status === "paid"
+                                      ? "#e8f5e9"
+                                      : commission.status === "pending"
+                                        ? "#fff3e0"
+                                        : "#ffebee",
+                                  color:
+                                    commission.status === "paid"
+                                      ? "#2e7d32"
+                                      : commission.status === "pending"
+                                        ? "#f57c00"
+                                        : "#c62828",
                                   fontWeight: 500,
                                   fontSize: "0.75rem",
                                   textTransform: "capitalize",
@@ -846,21 +938,6 @@ const SalesAgentPage = () => {
                   </TableContainer>
                 </Paper>
               </Box>
-            )}
-
-            {/* Reports View */}
-            {activeView === "reports" && (
-              <Card>
-                <CardContent sx={{ textAlign: "center", py: 6 }}>
-                  <Assignment sx={{ fontSize: 64, color: "#ccc", mb: 2 }} />
-                  <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                    Reports & Analytics
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Detailed reports and analytics will be available here.
-                  </Typography>
-                </CardContent>
-              </Card>
             )}
           </Box>
         </Box>
